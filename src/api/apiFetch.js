@@ -1,4 +1,4 @@
-export const apiFetch = async (url, method = 'GET', isAdmin, body = null) => {
+export const apiFetch = async (url, method, isAdmin, body = null) => {
   const token = document.cookie
     .replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1')
     .trim();

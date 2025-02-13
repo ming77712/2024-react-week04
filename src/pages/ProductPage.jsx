@@ -6,8 +6,6 @@ import Pagination from '../component/Pagination';
 
 const { VITE_URL, VITE_PATH } = import.meta.env;
 
-// let token = null;
-
 function Product() {
   const productModalRef = useRef(null);
   const [modalType, setModalType] = useState('');
@@ -48,21 +46,23 @@ function Product() {
       keyboard: false,
     });
 
+    const setModalControl = () => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+    };
+
     document
       .querySelector('#productModal')
-      .addEventListener('hide.bs.modal', () => {
-        if (document.activeElement instanceof HTMLElement) {
-          document.activeElement.blur();
-        }
-      });
+      .addEventListener('hide.bs.modal', setModalControl);
+
+    return () =>
+      document
+        .querySelector('#productModal')
+        .removeEventListener('hide.bs.modal', setModalControl);
   }, []);
 
   useEffect(() => {
-    // token = document.cookie.replace(
-    //   /(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/,
-    //   '$1'
-    // );
-
     getProducts();
   }, []);
 
@@ -126,7 +126,7 @@ function Product() {
     setPagination(data.pagination);
   };
 
-  const addProductData = async (id) => {
+  const addProductData = async () => {
     const url = `${VITE_URL}/api/${VITE_PATH}/admin/product`;
 
     const body = JSON.stringify({
