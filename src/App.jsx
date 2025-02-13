@@ -14,7 +14,7 @@ function App() {
 
     const data = await apiFetch(url, 'POST', true);
 
-    if (data.success) setIsAuth(true);
+    if (data?.success) setIsAuth(true);
   };
 
   useEffect(() => {

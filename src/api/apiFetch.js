@@ -3,6 +3,8 @@ export const apiFetch = async (url, method, isAdmin, body = null) => {
     .replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, '$1')
     .trim();
 
+  if (!token && isAdmin) return;
+
   const headers = new Headers({ 'Content-Type': 'application/json' });
 
   if (isAdmin) headers.append('Authorization', token);
