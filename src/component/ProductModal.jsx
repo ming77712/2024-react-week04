@@ -11,6 +11,7 @@ function ProductModal({
   handleImageChange,
   handleAddImage,
   handleRemoveImage,
+  addProductData,
   updateProductData,
   delProductData,
 }) {
@@ -275,7 +276,11 @@ function ProductModal({
                 <button
                   type='button'
                   className='btn btn-primary'
-                  onClick={() => updateProductData(templateData.id)}
+                  onClick={() =>
+                    modalType === 'edit'
+                      ? updateProductData(templateData.id)
+                      : addProductData(templateData.id)
+                  }
                 >
                   確認
                 </button>
@@ -308,6 +313,7 @@ ProductModal.propTypes = {
   handleImageChange: PropTypes.func.isRequired,
   handleAddImage: PropTypes.func.isRequired,
   handleRemoveImage: PropTypes.func.isRequired,
+  addProductData: PropTypes.func.isRequired,
   updateProductData: PropTypes.func.isRequired,
   delProductData: PropTypes.func.isRequired,
 };

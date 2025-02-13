@@ -1,11 +1,12 @@
 import * as bootstrap from 'bootstrap';
 import { useState, useEffect, useRef } from 'react';
+import { apiFetch } from '../api/apiFetch';
 import ProductModal from '../component/ProductModal';
 import Pagination from '../component/Pagination';
 
 const { VITE_URL, VITE_PATH } = import.meta.env;
 
-let token = null;
+// let token = null;
 
 function Product() {
   const productModalRef = useRef(null);
@@ -54,11 +55,13 @@ function Product() {
           document.activeElement.blur();
         }
       });
+  }, []);
 
-    token = document.cookie.replace(
-      /(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/,
-      '$1'
-    );
+  useEffect(() => {
+    // token = document.cookie.replace(
+    //   /(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/,
+    //   '$1'
+    // );
 
     getProducts();
   }, []);
@@ -115,35 +118,16 @@ function Product() {
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState({});
   const getProducts = async (page = 1) => {
-    try {
-      const response = await fetch(
-        `${VITE_URL}/api/${VITE_PATH}/admin/products?page=${page}`,
-        {
-          method: 'GET',
-          headers: new Headers({
-            'Content-Type': 'application/json',
-            Authorization: token,
-          }),
-        }
-      );
+    const url = `${VITE_URL}/api/${VITE_PATH}/admin/products?page=${page}`;
 
-      const data = await response.json();
-      setProducts(data.products);
-      setPagination(data.pagination);
-    } catch (error) {
-      console.error(error.response.data.message);
-    }
+    const data = await apiFetch(url, 'GET', true);
+
+    setProducts(data.products);
+    setPagination(data.pagination);
   };
 
-  const updateProductData = async (id) => {
-    let product;
-    if (modalType === 'edit') {
-      product = `product/${id}`;
-    } else {
-      product = `product`;
-    }
-
-    const url = `${VITE_URL}/api/${VITE_PATH}/admin/${product}`;
+  const addProductData = async (id) => {
+    const url = `${VITE_URL}/api/${VITE_PATH}/admin/product`;
 
     const body = JSON.stringify({
       data: {
@@ -155,76 +139,54 @@ function Product() {
       },
     });
 
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-      Authorization: token,
+    const data = await apiFetch(url, 'POST', true, body);
+
+    alert('新增成功', data.message);
+
+    closeModal();
+    getProducts(pagination);
+  };
+
+  const updateProductData = async (id) => {
+    const url = `${VITE_URL}/api/${VITE_PATH}/admin/product/${id}`;
+
+    const body = JSON.stringify({
+      data: {
+        ...templateData,
+        origin_price: Number(templateData.origin_price),
+        price: Number(templateData.price),
+        is_enabled: templateData.is_enabled ? 1 : 0,
+        imagesUrl: templateData.imagesUrl,
+      },
     });
 
-    try {
-      let response;
-      if (modalType === 'edit') {
-        response = await fetch(url, {
-          method: 'PUT',
-          body,
-          headers,
-        });
+    const data = await apiFetch(url, 'PUT', true, body);
 
-        const data = await response.json();
+    alert('更新成功', data.message);
 
-        alert('更新成功', data.message);
-      } else {
-        response = await fetch(url, {
-          method: 'POST',
-          body,
-          headers,
-        });
-
-        const data = await response.json();
-
-        alert('新增成功', data.message);
-      }
-
-      closeModal();
-      getProducts(pagination);
-    } catch (error) {
-      if (modalType === 'edit') {
-        console.error('更新失敗', error.response.data.message);
-      } else {
-        console.log(error);
-        console.error('新增失敗', error.response.data.message);
-      }
-    }
+    closeModal();
+    getProducts(pagination);
   };
 
   const delProductData = async (id) => {
-    try {
-      const response = await fetch(
-        `${VITE_URL}/api/${VITE_PATH}/admin/product/${id}`,
-        {
-          method: 'DELETE',
-          headers: new Headers({
-            'Content-Type': 'application/json',
-            Authorization: token,
-          }),
-        }
-      );
+    const url = `${VITE_URL}/api/${VITE_PATH}/admin/product/${id}`;
 
-      const data = await response.json();
+    const data = await apiFetch(url, 'DELETE', true);
 
-      alert('刪除成功', data.message);
+    alert('刪除成功', data.message);
 
-      closeModal();
-      getProducts(pagination);
-    } catch (error) {
-      console.error('刪除失敗', error.response.data.message);
-    }
+    closeModal();
+    getProducts(pagination);
   };
 
   return (
     <>
       <div className='container'>
         <div className='text-end mt-4'>
-          <button className='btn btn-primary' onClick={() => openModal('new')}>
+          <button
+            className='btn btn-primary'
+            onClick={() => openModal({}, 'new')}
+          >
             建立新的產品
           </button>
         </div>
@@ -292,6 +254,7 @@ function Product() {
         handleImageChange={handleImageChange}
         handleAddImage={handleAddImage}
         handleRemoveImage={handleRemoveImage}
+        addProductData={addProductData}
         updateProductData={updateProductData}
         delProductData={delProductData}
       />

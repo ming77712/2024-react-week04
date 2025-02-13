@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiFetch } from '../api/apiFetch';
 import PropTypes from 'prop-types';
 
 import '../assets/style.css';
@@ -11,7 +12,7 @@ function Login({ setIsAuth }) {
     password: '',
   });
 
-  const handleInputChange = (e) => {
+  const handleAccountInputChange = (e) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -21,24 +22,15 @@ function Login({ setIsAuth }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(`${VITE_URL}/admin/signin`, {
-        method: 'POST',
-        body: JSON.stringify(formData),
-        headers: new Headers({
-          'Content-Type': 'application/json',
-        }),
-      });
 
-      const data = await response.json();
+    const url = `${VITE_URL}/admin/signin`;
 
-      if (data.success) {
-        const { token, expired } = data;
-        document.cookie = `hexToken=${token};expires=${new Date(expired)};`;
-        setIsAuth(true);
-      }
-    } catch (error) {
-      console.error('登入失敗: ' + error.response.data.message);
+    const data = await apiFetch(url, 'POST', false, JSON.stringify(formData));
+
+    if (data.success) {
+      const { token, expired } = data;
+      document.cookie = `hexToken=${token};expires=${new Date(expired)};`;
+      setIsAuth(true);
     }
   };
 
@@ -55,7 +47,7 @@ function Login({ setIsAuth }) {
                 id='username'
                 placeholder='name@example.com'
                 value={formData.username}
-                onChange={handleInputChange}
+                onChange={handleAccountInputChange}
                 required
                 autoFocus
                 autoComplete='current-username'
@@ -69,7 +61,7 @@ function Login({ setIsAuth }) {
                 id='password'
                 placeholder='Password'
                 value={formData.password}
-                onChange={handleInputChange}
+                onChange={handleAccountInputChange}
                 required
                 autoComplete='current-password'
               />
