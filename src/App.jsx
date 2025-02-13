@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiFetch } from '../api/apiFetch';
+import { apiFetch } from './api/apiFetch';
 
 import LoginPage from './pages/LoginPage';
 import ProductPage from './pages/ProductPage';
